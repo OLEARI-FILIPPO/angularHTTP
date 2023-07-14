@@ -1,4 +1,4 @@
-import { HttpResponse } from '@angular/common/http';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { UserService } from './service/user.service';
 import { User } from './interface/user';
@@ -10,6 +10,7 @@ import { User } from './interface/user';
 })
 export class AppComponent implements OnInit{
   title = 'angularhttp';
+  fileStatus = {status: '', percentage: 0}
 
   private user: User =  {
     'id': 5,
@@ -46,7 +47,7 @@ export class AppComponent implements OnInit{
   ngOnInit(): void {
     //this.onUpdatePatchUser()
     //this.onDeleteUser()
-    this.onGetUsers()
+    //this.onGetUsers()
     //this.onGetUser()
     //this.onCreateUser()
   }
@@ -96,6 +97,42 @@ export class AppComponent implements OnInit{
       (response) => console.log(response),
       (error: any) => console.log(error),
       () => console.log('done deleting user')
+    );
+  }
+
+  onUploadFile(files: File[]): void{
+    console.log(files);
+    const formData = new FormData()
+    for(const file of files){
+      formData.append('files', file, file.name)
+    }
+    this.userService.updateFiles(formData).subscribe(
+      (event) => {
+       /* if(event.type == HttpEventType.DownloadProgress || HttpEventType.UploadProgress || HttpEventType.Response)
+          console.log(event);*/
+          
+        switch(event.type){
+          case HttpEventType.Sent || HttpEventType.DownloadProgress:
+            this.fileStatus.percentage = Math.round(event.loaded / event.type)
+            this.fileStatus.status = 'Progress'
+            console.log(this.fileStatus);
+            console.log(event.type)
+            break;
+          case HttpEventType.Response:
+            if( event.status == 200 ){
+              console.log(event.type)
+              this.fileStatus.percentage = 0
+              this.fileStatus.status = 'Done'
+              console.log(this.fileStatus);
+            }
+            break;
+            default:
+              console.log("event:" + event.type);
+              
+        }
+      },
+      (error: any) => console.log(error),
+      () => console.log('done updating files')
     );
   }
 }

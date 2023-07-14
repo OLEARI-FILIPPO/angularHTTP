@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpHeaders, HttpParams, HttpUserEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User } from '../interface/user';
 import { environment } from 'src/environments/environment.development';
@@ -34,6 +34,11 @@ export class UserService {
     return this.http.get<User[]>(`${this.apiUrl}/users`, {params: myParams} /*{headers: myHeaders}*/);
   }
 
+  getUsers_(): Observable<HttpEvent<User[]>>{
+    //HTTP Events: notifica l'esecuzione dell'API
+    return this.http.get<User[]>(`${this.apiUrl}/users`, { observe: 'events', reportProgress: true} );
+  }
+
   getUser(): Observable<User>{
     return this.http.get<User>(`${this.apiUrl}/users/1`);
   }
@@ -52,6 +57,11 @@ export class UserService {
 
   deleteUser(id: number): Observable<void>{
     return this.http.delete<void>(`${this.apiUrl}/users/${id}`);
+  }
+
+  updateFiles(formData: FormData): Observable<HttpEvent<string[]>>{
+    return this.http.post<string[]>(`https://localhost:7086/api/ErroriCaldaie`, formData,
+    { observe: 'events', reportProgress: true} );
   }
 }
 
